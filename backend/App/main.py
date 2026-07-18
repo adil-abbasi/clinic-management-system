@@ -2,7 +2,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database.database import engine, Base
 from app.models.doctor import Doctor
-
+from app.api.doctor_routes import router as doctor_router
+from app.models.patient import Patient
+from app.models.opd_visit import OPDVisit
+from app.api.patient_routes import router as patient_router
+app.include_router(patient_router)
+app.include_router(doctor_router, prefix="/api/v1")
 app = FastAPI(
     
     title="Clinic Management System API",
@@ -10,7 +15,7 @@ app = FastAPI(
     version="1.0.0"
 )
 Base.metadata.create_all(bind=engine)
-
+app.include_router(doctor_router)
 # Allow Electron/React frontend to access the backend
 app.add_middleware(
     CORSMiddleware,

@@ -14,8 +14,13 @@ class DoctorBase(BaseModel):
     email: Optional[str] = None
 
 
-class DoctorCreate(DoctorBase):
-    pass
+class DoctorCreate(BaseModel):
+    name: str
+    specialization: str
+    department: str
+    consultation_fee: float
+    phone: str | None = None
+    email: str | None = None
 
 
 class DoctorUpdate(BaseModel):
