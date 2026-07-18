@@ -1,82 +1,95 @@
 from sqlalchemy.orm import Session
 
-from app.models.patient import Patient
-from app.schemas.patient import PatientCreate, PatientUpdate
-from app.utils.code_generator import generate_code
+from app.models.doctor import Doctor
+from app.schemas.doctor import DoctorCreate, DoctorUpdate
 
 
-class PatientService:
-
-    @staticmethod
-    def create(db: Session, patient: PatientCreate):
-
-        code = generate_code(
-            db,
-            Patient,
-            "PAT",
-            "patient_code"
-        )
-
-        db_patient = Patient(
-            patient_code=code,
-            **patient.model_dump()
-        )
-
-        db.add(db_patient)
-        db.commit()
-        db.refresh(db_patient)
-
-        return db_patient
+class DoctorService:
 
     @staticmethod
-    def get_all(db: Session):
-        return db.query(Patient).all()
-
-    @staticmethod
-    def get(db: Session, patient_id: int):
-        return db.query(Patient).filter(
-            Patient.id == patient_id
-        ).first()
-
-    @staticmethod
-    def update(
+    def create_doctor(
         db: Session,
-        patient_id: int,
-        patient: PatientUpdate
+        doctor: DoctorCreate
     ):
 
-        obj = db.query(Patient).filter(
-            Patient.id == patient_id
+        db_doctor = Doctor(
+            **doctor.model_dump()
+        )
+
+        db.add(db_doctor)
+        db.commit()
+        db.refresh(db_doctor)
+
+        return db_doctor
+
+
+    @staticmethod
+    def get_all_doctors(
+        db: Session
+    ):
+
+        return db.query(Doctor).all()
+
+
+    @staticmethod
+    def get_doctor(
+        db: Session,
+        doctor_id: int
+    ):
+
+        return db.query(Doctor).filter(
+            Doctor.id == doctor_id
         ).first()
 
-        if not obj:
+
+    @staticmethod
+    def update_doctor(
+        db: Session,
+        doctor_id: int,
+        doctor: DoctorUpdate
+    ):
+
+        db_doctor = db.query(Doctor).filter(
+            Doctor.id == doctor_id
+        ).first()
+
+        if not db_doctor:
             return None
 
-        for key, value in patient.model_dump(
+
+        for key, value in doctor.model_dump(
             exclude_unset=True
         ).items():
-            setattr(obj, key, value)
+
+            setattr(
+                db_doctor,
+                key,
+                value
+            )
+
 
         db.commit()
-        db.refresh(obj)
+        db.refresh(db_doctor)
 
-        return obj
+        return db_doctor
+
 
     @staticmethod
-    def delete(
+    def delete_doctor(
         db: Session,
-        patient_id: int
+        doctor_id: int
     ):
 
-        obj = db.query(Patient).filter(
-            Patient.id == patient_id
+        db_doctor = db.query(Doctor).filter(
+            Doctor.id == doctor_id
         ).first()
 
-        if not obj:
+        if not db_doctor:
             return None
 
-        obj.is_active = False
+
+        db_doctor.is_active = False
 
         db.commit()
 
-        return obj
+        return db_doctor
