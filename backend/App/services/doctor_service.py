@@ -2,9 +2,11 @@ from sqlalchemy.orm import Session
 
 from app.models.doctor import Doctor
 from app.schemas.doctor import DoctorCreate, DoctorUpdate
+from app.utils.code_generator import generate_code
 
 
 class DoctorService:
+
 
     @staticmethod
     def create_doctor(
@@ -12,9 +14,19 @@ class DoctorService:
         doctor: DoctorCreate
     ):
 
+        code = generate_code(
+            db,
+            Doctor,
+            "DOC",
+            "doctor_code"
+        )
+
+
         db_doctor = Doctor(
+            doctor_code=code,
             **doctor.model_dump()
         )
+
 
         db.add(db_doctor)
         db.commit()
@@ -23,12 +35,14 @@ class DoctorService:
         return db_doctor
 
 
+
     @staticmethod
     def get_all_doctors(
         db: Session
     ):
 
         return db.query(Doctor).all()
+
 
 
     @staticmethod
@@ -42,6 +56,7 @@ class DoctorService:
         ).first()
 
 
+
     @staticmethod
     def update_doctor(
         db: Session,
@@ -49,47 +64,46 @@ class DoctorService:
         doctor: DoctorUpdate
     ):
 
-        db_doctor = db.query(Doctor).filter(
+        obj = db.query(Doctor).filter(
             Doctor.id == doctor_id
         ).first()
 
-        if not db_doctor:
+
+        if not obj:
             return None
 
 
-        for key, value in doctor.model_dump(
+        for key,value in doctor.model_dump(
             exclude_unset=True
         ).items():
 
-            setattr(
-                db_doctor,
-                key,
-                value
-            )
+            setattr(obj,key,value)
 
 
         db.commit()
-        db.refresh(db_doctor)
+        db.refresh(obj)
 
-        return db_doctor
+        return obj
+
 
 
     @staticmethod
     def delete_doctor(
         db: Session,
-        doctor_id: int
+        doctor_id:int
     ):
 
-        db_doctor = db.query(Doctor).filter(
+        obj = db.query(Doctor).filter(
             Doctor.id == doctor_id
         ).first()
 
-        if not db_doctor:
+
+        if not obj:
             return None
 
 
-        db_doctor.is_active = False
+        obj.is_active = False
 
         db.commit()
 
-        return db_doctor
+        return obj

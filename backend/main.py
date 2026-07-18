@@ -11,7 +11,7 @@ from app.models.opd_visit import OPDVisit
 # Import Routes
 from app.api.doctor_routes import router as doctor_router
 from app.api.patient_routes import router as patient_router
-
+from app.api.opd_routes import router as opd_router
 
 app = FastAPI(
     title="Clinic Management System API",
@@ -25,6 +25,7 @@ Base.metadata.create_all(bind=engine)
 # Register Routes
 app.include_router(doctor_router)
 app.include_router(patient_router)
+app.include_router(opd_router)
 
 # CORS
 app.add_middleware(
